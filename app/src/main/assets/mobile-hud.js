@@ -48,15 +48,19 @@
 
   // 2. Fix the visual flickering on the button ("10s" -> "30s (DolaBypass Mode)")
   function updateDolaButtonText() {
+    const hud = document.getElementById('dolabypass-mobile-hud');
     const candidates = document.querySelectorAll('button, div[role="button"], span, div');
     const targetLabel = `${currentDuration}s (DolaBypass Mode)`;
 
     for (const el of candidates) {
       if (!el || el.children.length > 0) continue;
+      // DO NOT touch our own HUD elements!
+      if (hud && hud.contains(el)) continue;
+
       const txt = (el.textContent || '').trim();
       if (!txt) continue;
 
-      // Check if it's the duration button
+      // Check if it's the duration button on Dola's dock
       const isDuration = /^(?:Авто\s*·\s*)?(?:5|10|15|20|25|30|60)\s*(?:s|с|с\.)(?:\s*\(.*?\))?$/iu.test(txt);
       if (isDuration) {
         const isControl = el.closest('button, [role="button"], [class*="dock"], [class*="bar"], [class*="footer"], [class*="control"], form');
@@ -110,9 +114,10 @@
           position: fixed;
           bottom: 70px;
           left: 14px;
-          width: 280px;
-          background: rgba(16, 12, 28, 0.94);
-          border: 1px solid rgba(192, 132, 252, 0.35);
+          right: 14px;
+          max-width: 320px;
+          background: rgba(16, 12, 28, 0.96);
+          border: 1px solid rgba(192, 132, 252, 0.45);
           backdrop-filter: blur(30px);
           -webkit-backdrop-filter: blur(30px);
           border-radius: 20px;
@@ -129,14 +134,15 @@
           border: 1px solid rgba(255,255,255,0.12);
           border-radius: 10px;
           color: #e2e8f0;
-          padding: 8px 4px;
+          padding: 10px 4px;
           font-size: 11px;
-          font-weight: 600;
+          font-weight: 700;
           text-align: center;
           cursor: pointer;
+          white-space: nowrap;
         }
         .dola-chip-btn.active {
-          background: rgba(168, 85, 247, 0.3);
+          background: rgba(168, 85, 247, 0.35);
           border-color: #c084fc;
           color: #fff;
           font-weight: 700;
