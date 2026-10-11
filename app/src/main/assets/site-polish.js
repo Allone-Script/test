@@ -3,12 +3,11 @@
 
     const SESSION_BADGE_ID = 'channa-tab-session-badge';
     const DEFAULT_DURATION = 30;
-    const VALID_DURATIONS = new Set([10, 15, 20, 25, 30, 60, 180, 300]);
 
     function getSelectedDuration() {
         try {
-            const value = Number(localStorage.getItem('rbshinko_selected_duration'));
-            return VALID_DURATIONS.has(value) ? value : DEFAULT_DURATION;
+            const value = Math.round(Number(localStorage.getItem('rbshinko_selected_duration')));
+            return (value >= 1 && value <= 300) ? value : DEFAULT_DURATION;
         } catch (_) {
             return DEFAULT_DURATION;
         }
@@ -26,7 +25,7 @@
     const LEGACY_MODE_PATTERN = /^\s*(?:Авто\s*·\s*)?(\d+)\s*(?:s|с|с\.)\s*\(\s*bypassed\s*\)\s*$/iu;
     const ACTIVE_MODE_PATTERN = /^\s*(?:Авто\s*·\s*)?(\d+)\s*(?:s|с|с\.)\s*\(\s*(?:Rbshinko|DolaBypass)\s+mode\s*\)\s*$/iu;
     const INLINE_LEGACY_MODE_PATTERN = /(\d+)\s*(?:s|с|с\.)\s*\(\s*bypassed\s*\)/giu;
-    const RELEVANT_MODE_TEXT = /bypassed|Rbshinko\s+mode|DolaBypass\s+mode|Авто\s*·\s*\d+\s*(?:с|с\.|s)|\b(?:5|10|15|20|25|30|60)\s*(?:с\.|с|s)\b/iu;
+    const RELEVANT_MODE_TEXT = /bypassed|Rbshinko\s+mode|DolaBypass\s+mode|Авто\s*·\s*\d+\s*(?:с|с\.|s)|\b\d+\s*(?:с\.|с|s)\b/iu;
     const DOWNLOAD_LABEL_TEXT = 'Download video';
     const LEGACY_DOWNLOAD_PATTERN = /^\s*(?:.{0,6}\s*)?fetch\s*\d+\s*s\s*hd\s*video\s*$/iu;
     const ACTIVE_DOWNLOAD_PATTERN = /^\s*(?:fetch\s*&\s*download\s*done|download\s+(?:original\s+)?video)\s*$/i;
@@ -67,7 +66,7 @@
             const txt = (el.textContent || '').trim();
             if (!txt) continue;
 
-            const isDurationLeaf = /^(?:Авто\s*·\s*)?(?:5|10|15|20|25|30|60|180|300)\s*(?:s|с|с\.)(?:\s*\(.*\))?$/iu.test(txt)
+            const isDurationLeaf = /^(?:Авто\s*·\s*)?\d+\s*(?:s|с|с\.)(?:\s*\(.*\))?$/iu.test(txt)
                 || /^\s*\d+\s*(?:s|с|с\.)\s*\(\s*(?:bypassed|DolaBypass|Rbshinko).*?\)\s*$/iu.test(txt);
 
             if (isDurationLeaf) {

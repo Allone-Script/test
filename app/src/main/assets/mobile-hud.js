@@ -177,12 +177,16 @@
           <span id="dolabypass-modal-close" style="font-size:16px; cursor:pointer; color:#94a3b8;">✕</span>
         </div>
 
-        <div style="font-size:10px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Длительность видео:</div>
-        <div style="display:flex; gap:6px;">
-          <div class="dola-chip-btn" data-sec="10">10 с</div>
-          <div class="dola-chip-btn" data-sec="15">15 с</div>
-          <div class="dola-chip-btn active" data-sec="30">30 с</div>
-          <div class="dola-chip-btn" data-sec="60">60 с</div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:10px; color:#94a3b8; text-transform:uppercase; font-weight:700;">Длительность:</span>
+          <span id="mobile-slider-val" style="font-size:11px; font-weight:800; color:#c084fc; font-family:monospace; background:rgba(168,85,247,0.25); border:1px solid rgba(192,132,252,0.4); padding:2px 8px; border-radius:9999px;">30 с</span>
+        </div>
+        <input type="range" id="mobile-range-slider" min="1" max="60" value="30" step="1" style="
+          -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:9999px;
+          background:rgba(255,255,255,0.15); outline:none; cursor:pointer; margin:4px 0;
+        ">
+        <div style="display:flex; justify-content:space-between; font-size:8.5px; color:#64748b; font-weight:600;">
+          <span>1с</span><span>15с</span><span>30с</span><span>45с</span><span>60с</span>
         </div>
 
         <div style="font-size:10px; color:#94a3b8; text-transform:uppercase; font-weight:700; margin-top:4px;">Быстрые действия:</div>
@@ -200,8 +204,25 @@
     const btn = document.getElementById('dolabypass-hud-btn');
     const modal = document.getElementById('dolabypass-hud-modal');
     const close = document.getElementById('dolabypass-modal-close');
-    const chips = modal.querySelectorAll('.dola-chip-btn');
     const hudLabel = document.getElementById('dolabypass-hud-label');
+    const mobileSlider = document.getElementById('mobile-range-slider');
+    const mobileSliderVal = document.getElementById('mobile-slider-val');
+
+    if (mobileSlider) {
+      mobileSlider.value = String(currentDuration);
+      if (mobileSliderVal) mobileSliderVal.textContent = `${currentDuration} с`;
+
+      const onSliderUpdate = () => {
+        const sec = Math.round(Number(mobileSlider.value)) || 30;
+        if (mobileSliderVal) mobileSliderVal.textContent = `${sec} с`;
+        enforceDuration(sec);
+        if (hudLabel) hudLabel.textContent = `Dola ${sec}s By Fikus`;
+        updateDolaButtonText();
+      };
+
+      mobileSlider.addEventListener('input', onSliderUpdate);
+      mobileSlider.addEventListener('change', onSliderUpdate);
+    }
 
     btn.addEventListener('click', () => {
       modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
@@ -209,17 +230,6 @@
 
     close.addEventListener('click', () => {
       modal.style.display = 'none';
-    });
-
-    chips.forEach(chip => {
-      chip.addEventListener('click', () => {
-        chips.forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        const sec = Number(chip.getAttribute('data-sec')) || 30;
-        enforceDuration(sec);
-        hudLabel.textContent = `Dola ${sec}s By Fikus`;
-        updateDolaButtonText();
-      });
     });
 
     document.getElementById('btn-mobile-reset-session').addEventListener('click', () => {

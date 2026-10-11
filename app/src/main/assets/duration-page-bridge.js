@@ -1,12 +1,12 @@
-// Rbshinko main-world bridge. Keeps the existing Seedance duration engine intact.
+// DolaBypass main-world bridge: keeps Seedance duration engine dynamic (1-60s)
 (() => {
-  const VALID = new Set([10, 15, 20, 25, 30, 60, 180, 300]);
+  'use strict';
   window.addEventListener('message', (event) => {
     if (event.source !== window) return;
     const data = event.data;
     if (!data || data.source !== 'RBSHINKO_EXTENSION' || data.type !== 'RBSHINKO_SET_SEEDANCE_DURATION') return;
-    const duration = Number(data.duration);
-    if (!VALID.has(duration)) return;
+    const duration = Math.round(Number(data.duration));
+    if (isNaN(duration) || duration < 1 || duration > 300) return;
     window.dispatchEvent(new CustomEvent('DOLA_SET_SEEDANCE_CONFIG', {
       detail: { duration, enabled: data.enabled !== false }
     }));

@@ -25,6 +25,7 @@ public class MainActivity extends Activity {
     private String mSplashJs = "";
     private String mSitePolishJs = "";
     private String mMobileHudJs = "";
+    private String mModelRewriterJs = "";
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -39,6 +40,7 @@ public class MainActivity extends Activity {
         getWindow().getDecorView().setBackgroundColor(0xFF07060D);
 
         // Preload bypass and HUD scripts from assets
+        mModelRewriterJs = loadAssetScript("model-rewriter.js");
         mInjectJs = loadAssetScript("inject.js");
         mDurationJs = loadAssetScript("duration-page-bridge.js");
         mSplashJs = loadAssetScript("dola-splash.js");
@@ -84,6 +86,9 @@ public class MainActivity extends Activity {
     }
 
     private void injectEarlyScripts(WebView view) {
+        if (!mModelRewriterJs.isEmpty()) {
+            view.evaluateJavascript(mModelRewriterJs, null);
+        }
         if (!mDurationJs.isEmpty()) {
             view.evaluateJavascript(mDurationJs, null);
         }
