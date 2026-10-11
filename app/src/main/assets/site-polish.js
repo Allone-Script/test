@@ -14,18 +14,17 @@
     }
 
     function formatDuration(value) {
-        const n = Number(value);
-        if (n >= 60 && n % 60 === 0) return `${n / 60}m`;
+        const n = Math.round(Number(value)) || DEFAULT_DURATION;
         return `${n}s`;
     }
 
     function sessionBadgeText(duration = getSelectedDuration()) {
         return `Dola ${formatDuration(duration)} by DolaBypass`;
     }
-    const LEGACY_MODE_PATTERN = /^\s*(?:Авто\s*·\s*)?(\d+)\s*(?:s|с|с\.)\s*\(\s*bypassed\s*\)\s*$/iu;
-    const ACTIVE_MODE_PATTERN = /^\s*(?:Авто\s*·\s*)?(\d+)\s*(?:s|с|с\.)\s*\(\s*(?:Rbshinko|DolaBypass)\s+mode\s*\)\s*$/iu;
-    const INLINE_LEGACY_MODE_PATTERN = /(\d+)\s*(?:s|с|с\.)\s*\(\s*bypassed\s*\)/giu;
-    const RELEVANT_MODE_TEXT = /bypassed|Rbshinko\s+mode|DolaBypass\s+mode|Авто\s*·\s*\d+\s*(?:с|с\.|s)|\b\d+\s*(?:с\.|с|s)\b/iu;
+    const LEGACY_MODE_PATTERN = /^\s*(?:Авто\s*·\s*)?(\d+)\s*(?:s|с|с\.|m|м|мин)?\s*\(\s*bypassed\s*\)\s*$/iu;
+    const ACTIVE_MODE_PATTERN = /^\s*(?:Авто\s*·\s*)?(\d+)\s*(?:s|с|с\.|m|м|мин)?\s*\(\s*(?:Rbshinko|DolaBypass)\s+mode\s*\)\s*$/iu;
+    const INLINE_LEGACY_MODE_PATTERN = /(\d+)\s*(?:s|с|с\.|m|м|мин)?\s*\(\s*bypassed\s*\)/giu;
+    const RELEVANT_MODE_TEXT = /bypassed|Rbshinko\s+mode|DolaBypass\s+mode|Авто\s*·\s*\d+\s*(?:с|с\.|s|m|м)|\b\d+\s*(?:с\.|с|s|m|м)\b/iu;
     const DOWNLOAD_LABEL_TEXT = 'Download video';
     const LEGACY_DOWNLOAD_PATTERN = /^\s*(?:.{0,6}\s*)?fetch\s*\d+\s*s\s*hd\s*video\s*$/iu;
     const ACTIVE_DOWNLOAD_PATTERN = /^\s*(?:fetch\s*&\s*download\s*done|download\s+(?:original\s+)?video)\s*$/i;
@@ -66,8 +65,8 @@
             const txt = (el.textContent || '').trim();
             if (!txt) continue;
 
-            const isDurationLeaf = /^(?:Авто\s*·\s*)?\d+\s*(?:s|с|с\.)(?:\s*\(.*\))?$/iu.test(txt)
-                || /^\s*\d+\s*(?:s|с|с\.)\s*\(\s*(?:bypassed|DolaBypass|Rbshinko).*?\)\s*$/iu.test(txt);
+            const isDurationLeaf = /^(?:Авто\s*·\s*)?\d+\s*(?:s|с|с\.|m|м|мин)?(?:\s*\(.*\))?$/iu.test(txt)
+                || /^\s*\d+\s*(?:s|с|с\.|m|м|мин)?\s*\(\s*(?:bypassed|DolaBypass|Rbshinko).*?\)\s*$/iu.test(txt);
 
             if (isDurationLeaf) {
                 const isControl = el.closest('button, [role="button"], [class*="dock"], [class*="bar"], [class*="footer"], [class*="control"], form, [class*="prompt"]');
@@ -225,8 +224,11 @@
         if (event.source !== window) return;
         const data = event.data;
         if (!data || data.source !== 'RBSHINKO_EXTENSION' || data.type !== 'RBSHINKO_SET_SEEDANCE_DURATION') return;
-        const duration = Number(data.duration);
-        if (!VALID_DURATIONS.has(duration)) return;
+        const duration = Math.round(Number(data.duration));
+        if (isNaN(duration) || duration < 1 || duration > 300) return;
+        try {
+            localStorage.setItem('rbshinko_selected_duration', String(duration));
+        } catch (_) {}
         polishSessionBadge(duration);
         polishPromptDurationButton(document, duration);
         polishModeLabels(document);
